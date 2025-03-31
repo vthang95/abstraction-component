@@ -1,49 +1,43 @@
-import { Flex, Input, NumberInput } from "@mantine/core";
+import { Flex, NumberInput } from "@mantine/core";
 
-export enum Type {
-  PERCENTAGE = "percentage",
-  FIXED = "fixed",
-}
+const INPUT_TYPE = {
+	percentage: "percentage",
+	fixed: "fixed",
+} as const;
 
-export type TypeProps = Type.FIXED | Type.PERCENTAGE;
+export type InputType = keyof typeof INPUT_TYPE;
 
 interface IProps {
-  type: TypeProps;
-  value: number;
-  onChangeValue: (value: number) => void;
+	type: InputType;
+	value: number;
+	onChange: (value: number) => void;
+	separator?: string;
 }
 
 const InputComponent = (props: IProps) => {
-  const { type, value = 0, onChangeValue } = props;
+	const { type, value, separator = "," } = props;
+	const inputProps =
+		type === "percentage"
+			? {
+					allowNegative: false,
+					min: 0,
+					max: 100,
+				}
+			: {};
 
-  const InputView = {
-    percentage: (
-      <NumberInput
-        rightSection={"%"}
-        w={"100%"}
-        value={value}
-        min={0}
-        max={100}
-        allowNegative={false}
-        onChange={(e) => {
-          onChangeValue(Number(e));
-        }}
-      />
-    ),
-    fixed: (
-      <NumberInput
-        value={value}
-        leftSection={"đ"}
-        rightSection={" "}
-        thousandSeparator=","
-        onChange={(e) => {
-          onChangeValue(Number(e));
-        }}
-      />
-    ),
-  }[type];
-
-  return <Flex w={"100%"}>{InputView}</Flex>;
+	return (
+		<Flex w={"100%"}>
+			<NumberInput
+				leftSection={type === "fixed" && "đ"}
+				rightSection={type === "percentage" ? "%" : " "}
+				thousandSeparator={separator}
+				value={value}
+				allowLeadingZeros={false}
+				onChange={(e) => void props.onChange(Number(e))}
+				{...inputProps}
+			/>
+		</Flex>
+	);
 };
 
 export default InputComponent;
